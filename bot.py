@@ -7,9 +7,7 @@ import os
 import time
 import discord
 from dotenv import load_dotenv
-from discord.ext import commands
 from discord.ext import tasks, commands
-import asyncio
 
 
 load_dotenv()
@@ -21,6 +19,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 intents = discord.Intents.default()
 intents.members = True
 bot = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='!')
 
 
 
@@ -48,11 +47,11 @@ async def on_ready():
 
 
 # Event listener for when a message is sent to a channel
-@bot.event
-async def on_message(message):
-    # if message.author.id == 341022026636591114:
-    #     await message.channel.send("Shuddup Mel!")
-    pass
+# @bot.event
+# async def on_message(message):
+#     if message.author.id == 341022026636591114:
+#         await message.channel.send("Shuddup Mel!")
+
 
 @tasks.loop(hours=24)
 async def check_for_anniversary():
@@ -66,9 +65,38 @@ async def check_for_anniversary():
             if joined.month == todays_date.month and joined.day == todays_date.day and joined.year != todays_date.year:
                 length = todays_date.year - joined.year
                 if length == 1:
-                    await channel_to_upload_to.send("It's {member.mention}'s anniversary! They have been a {guild.name} member for {length} year! :tada:")
+                    await channel_to_upload_to.send("It's {member.mention}'s anniversary! They have been a **{guild.name}** member for **{length} year**! :tada:")
                 elif length > 1:
-                    await channel_to_upload_to.send("It's {member.mention}'s anniversary! They have been a {guild.name} member for {length} years! :tada:")
+                    await channel_to_upload_to.send("It's {member.mention}'s anniversary! They have been a **{guild.name}** member for **{length} years**! :tada:")
+
+
+@bot.command()
+async def anniversary(ctx, user: discord.User):
+    todays_date = date.today()
+    joined = user.joined_at
+
+    #checks if already celebrated this year or not
+    if joined.month >= todays_date.month:
+        if joined.month == todays_date.month and joined.day > todays_date.day:
+            has_celebrated = False
+        elif joined.month == todays_date.month and joined.day < todays_date.day:
+            has_celebrated = True
+        else:
+            has_celebrated = False
+    else:
+        has_celebrated = True
+
+    if has_celebrated:
+        anniversary = date(year=todays_date.year + 1, month=joined.month, day=joined.day)
+        days_left = anniversary - todays_date
+    else:
+        anniversary = date(year=todays_date.year, month=joined.month, day=joined.day)
+        days_left = anniversary - todays_date
+    try:
+        await ctx.send(f"{user.name} joined on {joined.strftime('%m/%d/%Y')}. Only {days_left.days} days left to celebrate! :partying_face:")
+    except commands.errors.UserNotFoundUserNotFound:
+        await ctx.send(f"{user} is invalid. Try again.")
+
 
 # execute Bot
 bot.run(TOKEN)
