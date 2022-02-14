@@ -12,8 +12,8 @@ from discord.ext import tasks, commands
 
 load_dotenv()
 # loads the token from the .env file
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+
+# GUILD = os.getenv('DISCORD_GUILD')
 
 # get client object rom discord.py
 intents = discord.Intents.default()
@@ -29,17 +29,17 @@ bot = commands.Bot(command_prefix='!')
 # on_ready() will be called the message will be printed once client is ready for further action. (When bot switches from Offline to Online)
 @bot.event
 async def on_ready():
-    guild_count = 0
+    # guild_count = 0
     #Here, you looped through the guild data that Discord has sent client, namely client.guilds. Then, you found the guild with the matching name and printed a formatted string to stdout.
-    for guild in bot.guilds:
-        guild_count += 1
-        if guild.name == GUILD:
-            break
+    # for guild in bot.guilds:
+    #     guild_count += 1
+    #     if guild.name == GUILD:
+    #         break
             
-    print(
-        f'{bot.user} is connected to {guild_count} guild/s:\n'
-        f'{guild.name}(id: {guild.id})'
-    )
+#    print(
+#        f'{bot.user} is connected to {guild_count} guild/s:\n'
+#        f'{guild.name}(id: {guild.id})'
+#    )
     check_for_anniversary.start()
     # Output:
     # Mel's Bot#4009 is connected to the following guild:
@@ -99,4 +99,4 @@ async def anniversary(ctx, user: discord.User):
 
 
 # execute Bot
-bot.run(TOKEN)
+bot.run(process.env.DISCORD_TOKEN)
